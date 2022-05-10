@@ -1,0 +1,145 @@
+<html>
+<head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #000;
+        }
+
+        #path {
+            border: 5px double #05C;
+            border-radius: 10px;
+            height: 54px;
+            margin: 100px auto;
+            padding: 10px;
+            position: relative;
+            width: 96%;
+        }
+
+        #PacMan {
+            left: 0;
+            position: absolute;
+            z-index: 5;
+        }
+
+        .dot {
+            background: rgb(255, 245, 2);
+            border-radius: 50%;
+            position: absolute;
+            height: 10px;
+            top: 32px;
+            width: 10px;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="path">
+        <img id="PacMan" src="PacMan1.png" width="50" onclick="Run()">
+    </div>
+
+    <script>
+        // Assign the four state-images to the PacMan img array.
+        const imgArray = [
+        ['PacMan1.png', 'PacMan2.png'],
+        ['PacMan3.png', 'PacMan4.png']
+        ];
+
+        // This assigns the img variable to the PacMan img element.
+        const img = document.getElementById('PacMan');
+        const imgWidth = img.width;
+
+        // pageWidth is the width of the webpage. This is later used to calculate when Pac-Man needs to turn around. 
+        const pageWidth = window.innerWidth;
+
+        // d is the dot number counter.
+        let d = 1;
+
+        // pos is the PacMan image x position variable. It is set to 0 initially.
+        var pos = 0;
+
+        // This variable defines what direction should PacMan go into:
+        // 0 = left to right
+        // 1 = right to left (reverse)
+        var direction = 0;
+
+        // This variable determines which PacMan image should be displayed.
+        // 0 = opened
+        // 1 = closed
+        var state = 0;
+
+        // This function moves and updates the PacMan image, position, and direction on the screen.
+        function Run() {
+            state = (state + 1) % 2;
+            direction = checkPageBounds(direction, imgWidth, pos, pageWidth);
+            devour    = checkDevour(d);     
+            img.src = imgArray[direction][state];
+            if (direction) {
+                pos -= 20;
+                img.style.left = pos + 'px';
+            } else {
+                pos += 20;
+                img.style.left = pos + 'px';
+            }
+        }
+
+        // This function determines whether or not a dot is devoured by Pacman by comparing Pacman's position to each dot's position. 
+        function checkDevour(d) {
+            imgX = parseInt(img.style.left);
+            imgY = parseInt(img.style.top);
+            for (let i = 1; i < d; i++) {
+                let dot = document.getElementById('dot' + i);
+                dotX = parseInt(dot.style.left);
+                dotY = parseInt(dot.style.top);
+                if ((direction === 0 && imgX > dotX - imgWidth) || (direction === 1 && imgX < dotX)) {
+                    dot.style.display = 'none';
+                }
+            }
+        }
+
+        // This function determines the direction of PacMan based on screen edge detection. 
+        function checkPageBounds(direction, imgWidth, pos, pageWidth) {
+            pageWidth = pageWidth - imgWidth - 20;
+            if (direction == 0 && pos >= pageWidth - imgWidth) {
+                direction = 1;
+                recreateDots(); // Optional behavior. Comment out if you don't want to recreate the dots when changing direction.
+            } else if (direction != 0 && pos <= 20) {
+                direction = 0;
+                recreateDots(); // Optional behavior. Comment out if you don't want to recreate the dots when changing direction.
+            }
+            return direction;
+        }
+        
+        // This function creates a row of dots to be deveoured by Pacman. 
+        function createDots() {
+            for (let x = 60; x < pageWidth - 50; x = x + 60) {
+                let dot = document.createElement('div')
+                dot.style.left = x + 'px';
+                dot.id = 'dot' + d;
+                dot.className += 'dot';
+                document.getElementById('path').appendChild(dot);
+                d++;
+            }
+        }
+
+        // This function makes the devoured dots re-appear. 
+        function recreateDots() {
+            for (let i = 1; i < d; i++) {
+                let dot = document.getElementById('dot' + i);
+                dot.style.display = 'block';
+            }
+        }
+        
+        // TODO: Add a Javascript setInterval() method that will call the Run() function above every 200 milliseconds. 
+        // Inside of the Run() function you will also have to add an extra argument "pageWidth", which is declared on line 4 when you call the checkPageBounds() function below. 
+        createDots();
+        setInterval(Run, 100);
+    </script>
+</body>
+
+</html>
